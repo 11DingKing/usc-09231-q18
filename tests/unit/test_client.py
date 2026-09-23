@@ -60,10 +60,10 @@ class TestVNCDoToolClient(TestCase):
         ])
 
     def test_fence_is_not_offered_by_default(self):
-        """ . "说明"The mocked factory above answers True to every flag, so the real
+        """The mocked factory above answers True to every flag, so the real
         one is needed to see what is actually offered. A server sends fences
         only to a client that asked for them, and nothing here waits on one.
-        """ . "说明"
+        """
         cli = self.client
         cli.factory = client.VNCDoToolFactory()
         cli.factory.clientConnectionMade = mock.Mock()
@@ -75,10 +75,10 @@ class TestVNCDoToolClient(TestCase):
         self.assertNotIn(client.rfb.Encoding.PSEUDO_FENCE, offered)
 
     def test_cursor_is_offered_by_default(self):
-        """ . "说明"A server only stops painting the pointer into the framebuffer once
+        """A server only stops painting the pointer into the framebuffer once
         a client asks for Cursor, so it is offered whether or not the shape
         will be drawn (see specs/cursor.md).
-        """ . "说明"
+        """
         cli = self.client
         cli.factory = client.VNCDoToolFactory()
         cli.factory.clientConnectionMade = mock.Mock()
@@ -90,7 +90,7 @@ class TestVNCDoToolClient(TestCase):
         self.assertIn(client.rfb.Encoding.PSEUDO_CURSOR, offered)
 
     def test_pointer_pos_is_offered_beside_cursor(self):
-        """ . "说明"UltraVNC revokes Cursor unless PointerPos is offered too.""" . "说明"
+        """UltraVNC revokes Cursor unless PointerPos is offered too."""
         cli = self.client
         cli.factory = client.VNCDoToolFactory()
         cli.factory.clientConnectionMade = mock.Mock()
@@ -111,9 +111,9 @@ class TestVNCDoToolClient(TestCase):
         self.assertIsNone(cli.cursor)
 
     def test_updateCursor_hides_pointer_on_zero_size(self):
-        """ . "说明"RFC 6143 7.6.1: a Cursor pseudo-encoding update with width or
+        """RFC 6143 7.6.1: a Cursor pseudo-encoding update with width or
         height 0 means hide the pointer, not an empty image to decode.
-        """ . "说明"
+        """
         cli = self.client
         cli.factory.cursor = CursorMode.LOCAL
         cli.cursor = Image.new("RGB", (4, 4))
@@ -124,7 +124,7 @@ class TestVNCDoToolClient(TestCase):
 
         self.assertIsNone(cli.cursor)
         self.assertIsNone(cli.cmask)
-        cli.drawCursor()
+        self.assertIsNone(cli.cursorInfo())
 
     def test_requested_encodings_replace_the_default_list(self):
         cli = self.client
@@ -138,9 +138,9 @@ class TestVNCDoToolClient(TestCase):
         self.assertEqual(client.rfb.Encoding.RAW, offered[0])
 
     def test_no_jpeg_quality_is_offered_by_default(self):
-        """ . "说明"Tight is now offered by default, and a JPEG quality level is what
+        """Tight is now offered by default, and a JPEG quality level is what
         tells a conforming server it may send lossy rectangles.
-        """ . "说明"
+        """
         cli = self.client
         cli.factory = client.VNCDoToolFactory()
         cli.factory.clientConnectionMade = mock.Mock()
@@ -261,8 +261,8 @@ class TestVNCDoToolClient(TestCase):
 
     @mock.patch('vncdotool.client.Deferred')
     def test_expectCompareMismatch(self, Deferred):
-        """ . "说明"A target the screen is not the size of never matches, however lax
-        the fuzz.""" . "说明"
+        """A target the screen is not the size of never matches, however lax
+        the fuzz."""
         cli = self._comparing(self._swatch((0x2A, 0x2A, 0x2A), (0x2A, 0x2A, 0x2A)),
                               self._swatch((0x2A, 0x2A, 0x2A)))
 
@@ -294,9 +294,9 @@ class TestVNCDoToolClient(TestCase):
         return image
 
     def test_expectCompareAllowsWhatTheFormatCannotExpress(self):
-        """ . "说明"`expect FILE` at rgb565 would otherwise poll until it timed out: no
+        """`expect FILE` at rgb565 would otherwise poll until it timed out: no
         5-bit red can carry 0x2A, so an exact match never comes.
-        """ . "说明"
+        """
         target = self._swatch((0x2A, 0x2A, 0x2A), (0xC1, 0xC1, 0xC1))
         screen = self._swatch((0x29, 0x29, 0x29), (0xC6, 0xC3, 0xC6))
         result = self._expectAgainst(PIXEL_FORMATS["rgb565"], target, screen)
@@ -579,9 +579,9 @@ class TestImageMode(TestCase):
         self.client.factory = mock.Mock()
 
     def patch_setPixelFormat(self) -> mock.Mock:
-        """ . "说明"patch.object rather than assignment: it restores the method
+        """patch.object rather than assignment: it restores the method
         afterwards, and mypy does not read a bound method as assignable.
-        """ . "说明"
+        """
         patcher = mock.patch.object(self.client, "setPixelFormat")
         self.addCleanup(patcher.stop)
         return patcher.start()
@@ -741,11 +741,11 @@ class TestRequestedJpegQuality(TestCase):
 
 
 class TestFullScreenRefresh(TestCase):
-    """ . "说明"A non-incremental refresh waits for the whole framebuffer.
+    """A non-incremental refresh waits for the whole framebuffer.
 
     RFC 6143 section 7.5.3 lets a server answer one request across several
     FramebufferUpdate messages.
-    """ . "说明"
+    """
 
     WIDTH, HEIGHT = 8, 4
 
@@ -877,11 +877,11 @@ class TestFullScreenRefresh(TestCase):
 
 
 class TestStableScreen(TestCase):
-    """ . "说明"`stable` waits out a window in which nothing changed.
+    """`stable` waits out a window in which nothing changed.
 
     A `Clock` stands in for the reactor so the window can be advanced without
     running one.
-    """ . "说明"
+    """
 
     def setUp(self) -> None:
         self.clock = Clock()

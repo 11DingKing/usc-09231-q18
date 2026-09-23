@@ -38,7 +38,7 @@ class TestPointerPos(unittest.TestCase):
         self.assertEqual(self.cli.cursor_pos, (150, 120))
 
     def test_rectangle_consumes_no_payload(self) -> None:
-        """ . "说明"A following rectangle in the same update still decodes.""" . "说明"
+        """A following rectangle in the same update still decodes."""
         handshake(self.cli, 400, 400)
         self.cli.factory.cursor = CursorMode.LOCAL
 
@@ -48,7 +48,7 @@ class TestPointerPos(unittest.TestCase):
         self.assertEqual(self.cli.cfocus, (1, 1))
 
     def test_position_is_not_a_screen_change(self) -> None:
-        """ . "说明"Nothing was painted, so the rectangle must not satisfy a refresh.""" . "说明"
+        """Nothing was painted, so the rectangle must not satisfy a refresh."""
         handshake(self.cli, 400, 400)
 
         self.cli.dataReceived(framebuffer_update([POINTER_POS]))
@@ -63,8 +63,9 @@ class TestPointerPos(unittest.TestCase):
 
         self.assertIsNone(self.cli.cursor_pos)
 
-    def test_the_shape_is_drawn_where_the_server_says(self) -> None:
-        """ . "说明"--localcursor composites at the server's position, not the script's.""" . "说明"
+    def test_the_shape_is_composited_where_the_server_says(self) -> None:
+        """--localcursor composites at the server's position, not the script's,
+        and leaves the framebuffer itself untouched."""
         handshake(self.cli, 400, 400)
         self.cli.factory.cursor = CursorMode.LOCAL
         self.cli.screen = Image.new("RGB", (400, 400))
@@ -73,7 +74,12 @@ class TestPointerPos(unittest.TestCase):
 
         self.cli.dataReceived(framebuffer_update([POINTER_POS]))
 
-        self.assertEqual(self.cli.screen.getpixel((150, 120)), IMAGE_2X2[0])
+        # The framebuffer keeps the server's picture: no cursor baked in.
+        self.assertEqual(self.cli.screen.getpixel((150, 120)), (0, 0, 0))
+
+        canvas = self.cli.screen.copy()
+        self.cli.drawCursor(canvas)
+        self.assertEqual(canvas.getpixel((150, 120)), IMAGE_2X2[0])
 
     def test_a_click_still_goes_where_the_script_put_it(self) -> None:
         handshake(self.cli, 400, 400)
